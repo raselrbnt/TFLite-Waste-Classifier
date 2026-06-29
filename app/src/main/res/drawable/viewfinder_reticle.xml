@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="250dp"
+    android:height="250dp"
+    android:viewportWidth="250"
+    android:viewportHeight="250">
+    <!-- Sudut Kiri Atas -->
+    <path
+        android:pathData="M 10 30 L 10 10 L 30 10"
+        android:strokeColor="@color/brand_neon"
+        android:strokeWidth="4" />
+    <!-- Sudut Kanan Atas -->
+    <path
+        android:pathData="M 220 10 L 240 10 L 240 30"
+        android:strokeColor="@color/brand_neon"
+        android:strokeWidth="4" />
+    <!-- Sudut Kiri Bawah -->
+    <path
+        android:pathData="M 10 220 L 10 240 L 30 240"
+        android:strokeColor="@color/brand_neon"
+        android:strokeWidth="4" />
+    <!-- Sudut Kanan Bawah -->
+    <path
+        android:pathData="M 220 240 L 240 240 L 240 220"
+        android:strokeColor="@color/brand_neon"
+        android:strokeWidth="4" />
+</vector>

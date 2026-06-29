@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background utama -->
+    <item>
+        <shape>
+            <solid android:color="@color/brand_surface_dim" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <!-- Border bawah warning red -->
+    <item android:top="76dp">
+        <shape>
+            <solid android:color="@color/brand_warning_red" />
+            <corners android:bottomLeftRadius="4dp" android:bottomRightRadius="4dp" />
+        </shape>
+    </item>
+</layer-list>

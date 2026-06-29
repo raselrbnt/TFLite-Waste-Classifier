@@ -1,0 +1,39 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema Utama Aplikasi -->
+    <style name="Theme.SampahClassifierApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryVariant">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/brand_surface_white</item>
+
+        <!-- Status Bar & Background -->
+        <item name="android:statusBarColor">@color/brand_bg_light</item>
+        <item name="android:windowBackground">@color/brand_bg_light</item>
+        <item name="android:navigationBarColor">@color/brand_bg_light</item>
+
+        <!-- Force light status bar icons (karena background kita putih/terang) -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- Gaya Tombol Utama Neon -->
+    <style name="Widget.EcoTech.Button.Neon" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/brand_neon</item>
+        <item name="android:textColor">@color/brand_dark_charcoal</item>
+        <item name="fontFamily">@font/space_grotesk_bold</item>
+        <item name="cornerRadius">4dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- Gaya Tombol Sekunder Borderless/Outlined -->
+    <style name="Widget.EcoTech.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/brand_dark_charcoal</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/brand_dark_charcoal</item>
+        <item name="fontFamily">@font/space_grotesk_medium</item>
+        <item name="cornerRadius">4dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+    </style>
+</resources>

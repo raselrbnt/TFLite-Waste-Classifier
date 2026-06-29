@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">SampahClassifierApp</string>
+    
+    <!-- Dashboard Strings -->
+    <string name="dashboard_title">EcoTech Core</string>
+    <string name="status_system_active">SYSTEM ACTIVE</string>
+    <string name="status_message">Status: Menunggu input pemindaian.</string>
+    <string name="label_daily_impact">DAMPAK HARIAN</string>
+    <string name="label_total_scan">TOTAL PEMINDAIAN</string>
+    <string name="label_organik">ORGANIK</string>
+    <string name="label_anorganik">ANORGANIK</string>
+    <string name="ml_core_standby">[ ML CORE STANDBY ]</string>
+    <string name="btn_start_scanner">MULAI PEMINDAI</string>
+    
+    <!-- Scanner Strings -->
+    <string name="permission_denied">Izin kamera ditolak</string>
+    <string name="camera_failed">Gagal memulai kamera</string>
+    <string name="photo_failed">Gagal menangkap gambar</string>
+    <string name="ml_system_active">((•)) [ SISTEM ML AKTIF ]</string>
+    <string name="searching_object">[ MENCARI OBJEK ]</string>
+    <string name="gallery_picker_todo">Gallery picker belum diimplementasi</string>
+    <string name="flash_toggle_todo">Flash toggle belum diimplementasi</string>
+    
+    <!-- Result Strings -->
+    <string name="result_header">HASIL ANALISIS</string>
+    <string name="confidence_label">TINGKAT KEPERCAYAAN: %d%%</string>
+    <string name="instructions_header">ⓘ INSTRUKSI PENANGANAN</string>
+    <string name="bullet_prefix">> </string>
+    <string name="btn_scan_other">PINDAI LAINNYA</string>
+    <string name="btn_save_note">SIMPAN KE CATATAN</string>
+    <string name="btn_back">KEMBALI</string>
+    <string name="save_success">Tersimpan ke Catatan!</string>
+    
+    <!-- Organik Instructions -->
+    <string name="organik_bullet1">Buang ke dalam wadah khusus KOMPOS.</string>
+    <string name="organik_bullet2">Pastikan bebas dari kontaminasi plastik.</string>
+    <string name="organik_bullet3">Material dapat terurai secara alami.</string>
+    
+    <!-- Anorganik Instructions -->
+    <string name="anorganik_bullet1">Bersihkan dari sisa makanan/cairan.</string>
+    <string name="anorganik_bullet2">Pisahkan berdasarkan jenis (plastik/kertas).</string>
+    <string name="anorganik_bullet3">Salurkan ke bank sampah terdekat.</string>
+    
+
+    
+    <!-- History & Learn Strings -->
+    <string name="history_learn_title">CATATAN &amp; PELAJARI</string>
+    <string name="tab_notes">CATATAN</string>
+    <string name="tab_database">BASIS DATA</string>
+    <string name="learn_subtitle">Panduan pemilahan offline berpresisi tinggi. Ketuk kategori untuk melihat detail.</string>
+    <string name="confidence_display">%d%% Confidence</string>
+    
+    <!-- Error Messages -->
+    <string name="error_classification">Error klasifikasi: %s</string>
+    <string name="error_image_not_loaded">Gambar tidak dapat dimuat</string>
+    <string name="error_file_not_found">File gambar tidak ditemukan</string>
+    <string name="error_generic">Error: %s</string>
+    <string name="error_ml_loading">Gagal memuat model ML: %s</string>
+</resources>

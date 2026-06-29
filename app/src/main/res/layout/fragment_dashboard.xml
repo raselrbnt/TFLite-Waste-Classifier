@@ -1,0 +1,238 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/brand_bg_light">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Header Bar -->
+        <ImageView
+            android:id="@+id/img_logo"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_compass"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EcoTech Core"
+            android:textColor="@color/brand_dark_charcoal"
+            android:fontFamily="@font/space_grotesk_bold"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/img_logo"
+            app:layout_constraintTop_toTopOf="@id/img_logo"
+            app:layout_constraintBottom_toBottomOf="@id/img_logo" />
+
+        <View
+            android:id="@+id/divider_header"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/brand_surface_dim"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/img_logo" />
+
+        <!-- Status Card: SYSTEM ACTIVE -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_minimal"
+            android:padding="16dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/divider_header">
+
+            <TextView
+                android:id="@+id/tv_status_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SYSTEM ACTIVE"
+                android:textColor="@color/brand_primary"
+                android:fontFamily="@font/space_grotesk_bold"
+                android:textSize="16sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_status_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status: Menunggu input pemindaian."
+                android:textColor="@color/brand_text_secondary"
+                android:fontFamily="@font/dm_sans_regular"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_status_title"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Dampak Harian Label -->
+        <TextView
+            android:id="@+id/tv_dampak_harian"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DAMPAK HARIAN"
+            android:textColor="@color/brand_dark_charcoal"
+            android:fontFamily="@font/space_grotesk_bold"
+            android:textSize="12sp"
+            android:letterSpacing="0.05"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/card_status"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/ic_chart"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@android:drawable/arrow_up_float"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_dampak_harian"
+            app:layout_constraintBottom_toBottomOf="@id/tv_dampak_harian" />
+
+        <!-- 2x2 Grid Statistics -->
+        <!-- 1. Total Pemindaian -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/grid_total_scan"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@drawable/bg_card_total_scan"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_dampak_harian"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/lbl_total_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TOTAL PEMINDAIAN"
+                android:textSize="10sp"
+                android:textColor="@color/brand_text_secondary"
+                android:fontFamily="@font/space_grotesk_medium"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/val_total_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="124"
+                android:textSize="24sp"
+                android:textColor="@color/brand_primary"
+                android:fontFamily="@font/space_grotesk_bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 2. Organik -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/grid_organik"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:background="@drawable/bg_card_minimal"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="6dp"
+            app:layout_constraintTop_toBottomOf="@id/grid_total_scan"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintEnd_toStartOf="@id/grid_anorganik">
+
+            <TextView
+                android:id="@+id/lbl_organik"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ORGANIK"
+                android:textSize="10sp"
+                android:textColor="@color/brand_text_secondary"
+                android:fontFamily="@font/space_grotesk_medium"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/val_organik"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="82"
+                android:textSize="24sp"
+                android:textColor="@color/brand_dark_charcoal"
+                android:fontFamily="@font/space_grotesk_bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 3. Anorganik -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/grid_anorganik"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:background="@drawable/bg_card_minimal"
+            android:padding="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="6dp"
+            app:layout_constraintTop_toBottomOf="@id/grid_total_scan"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toEndOf="@id/grid_organik">
+
+            <TextView
+                android:id="@+id/lbl_anorganik"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ANORGANIK"
+                android:textSize="10sp"
+                android:textColor="@color/brand_text_secondary"
+                android:fontFamily="@font/space_grotesk_medium"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/val_anorganik"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="38"
+                android:textSize="24sp"
+                android:textColor="@color/brand_dark_charcoal"
+                android:fontFamily="@font/space_grotesk_bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Standby Subtitle -->
+        <TextView
+            android:id="@+id/tv_standby"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[ ML CORE STANDBY ]"
+            android:textColor="@color/brand_text_secondary"
+            android:fontFamily="@font/space_grotesk_medium"
+            android:textSize="11sp"
+            android:layout_marginTop="48dp"
+            app:layout_constraintTop_toBottomOf="@id/grid_anorganik"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Tombol Utama: Mulai Pemindai -->
+        <Button
+            android:id="@+id/btn_mulai_pemindai"
+            style="@style/Widget.EcoTech.Button.Neon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MULAI PEMINDAI"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_standby" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

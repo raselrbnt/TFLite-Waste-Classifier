@@ -1,0 +1,215 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/brand_bg_light">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Back Button & Header -->
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HASIL ANALISIS"
+            android:textColor="@color/brand_dark_charcoal"
+            android:fontFamily="@font/space_grotesk_bold"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/btn_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btn_back"
+            app:layout_constraintBottom_toBottomOf="@id/btn_back"
+            app:layout_constraintHorizontal_bias="0.4" />
+
+        <!-- Captured Image Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_image_container"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/black"
+            app:layout_constraintTop_toBottomOf="@id/btn_back">
+
+            <ImageView
+                android:id="@+id/img_captured"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop" />
+
+            <!-- Neon Green bottom highlight indicator line under image -->
+            <View
+                android:id="@+id/view_result_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:background="@color/brand_neon"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Confidence Rating Text -->
+        <TextView
+            android:id="@+id/tv_lbl_confidence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TINGKAT KEPERCAYAAN: 98.4%"
+            android:textColor="@color/brand_text_secondary"
+            android:fontFamily="@font/space_grotesk_medium"
+            android:textSize="11sp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/layout_image_container"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Classification Category -->
+        <TextView
+            android:id="@+id/tv_classification_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ORGANIK"
+            android:textColor="@color/brand_neon"
+            android:shadowColor="#33000000"
+            android:shadowRadius="2"
+            android:fontFamily="@font/space_grotesk_bold"
+            android:textSize="36sp"
+            app:layout_constraintTop_toBottomOf="@id/tv_lbl_confidence"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Handling Instructions Card -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_card_minimal"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_classification_result">
+
+            <TextView
+                android:id="@+id/lbl_instructions_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ⓘ INSTRUKSI PENANGANAN"
+                android:textColor="@color/brand_dark_charcoal"
+                android:fontFamily="@font/space_grotesk_bold"
+                android:textSize="11sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Dynamic bullet instructions in vertical layout -->
+            <LinearLayout
+                android:id="@+id/layout_bullets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/lbl_instructions_header">
+
+                <!-- Bullet 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="> "
+                        android:textColor="@color/brand_primary"
+                        android:fontFamily="@font/space_grotesk_bold" />
+                    <TextView
+                        android:id="@+id/tv_bullet_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Buang ke dalam wadah atau tempat sampah khusus KOMPOS."
+                        android:textColor="@color/brand_dark_charcoal"
+                        android:fontFamily="@font/dm_sans_regular"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <!-- Bullet 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="> "
+                        android:textColor="@color/brand_primary"
+                        android:fontFamily="@font/space_grotesk_bold" />
+                    <TextView
+                        android:id="@+id/tv_bullet_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pastikan material bebas dari kontaminasi plastik pelapis atau stiker buah."
+                        android:textColor="@color/brand_dark_charcoal"
+                        android:fontFamily="@font/dm_sans_regular"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <!-- Bullet 3 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="> "
+                        android:textColor="@color/brand_primary"
+                        android:fontFamily="@font/space_grotesk_bold" />
+                    <TextView
+                        android:id="@+id/tv_bullet_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Material ini dapat terurai secara alami dan optimal untuk pembuatan pupuk organik."
+                        android:textColor="@color/brand_dark_charcoal"
+                        android:fontFamily="@font/dm_sans_regular"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Action Buttons -->
+        <Button
+            android:id="@+id/btn_pindai_lainnya"
+            style="@style/Widget.EcoTech.Button.Neon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PINDAI LAINNYA"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/card_instructions" />
+
+        <Button
+            android:id="@+id/btn_simpan_catatan"
+            style="@style/Widget.EcoTech.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SIMPAN KE CATATAN"
+            app:icon="@android:drawable/ic_menu_save"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/btn_pindai_lainnya" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
