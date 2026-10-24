@@ -29,20 +29,31 @@ class ScannerFragment : Fragment(R.layout.fragment_scanner) {
     private var camera: androidx.camera.core.Camera? = null
     private var isFlashOn = false
 
+    /**
+     * Menyimpan referensi ke file sementara yang sedang menunggu keputusan pengguna
+     * (simpan ke catatan atau tidak). File ini berada di cacheDir dan akan dibersihkan
+     * secara otomatis oleh ResultFragment jika pengguna kembali tanpa menyimpan.
+     */
+    private var pendingTempFile: File? = null
+
     private val getContentLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             try {
                 val inputStream = requireContext().contentResolver.openInputStream(uri)
-                val photoFile = File(
+                // Simpan salinan sementara di cacheDir; ResultFragment akan memindahkannya
+                // ke filesDir (permanen) jika pengguna memilih "Simpan Catatan".
+                val tempFile = File(
                     requireContext().cacheDir,
-                    SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(System.currentTimeMillis()) + "_gallery.jpg"
+                    "TEMP_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(System.currentTimeMillis())}_gallery.jpg"
                 )
-                photoFile.outputStream().use { outputStream ->
+                tempFile.outputStream().use { outputStream ->
                     inputStream?.copyTo(outputStream)
                 }
-                
+                pendingTempFile = tempFile
+
                 val bundle = Bundle().apply {
-                    putString("imagePath", photoFile.absolutePath)
+                    putString("imagePath", tempFile.absolutePath)
+                    putBoolean("isReadOnly", false)
                 }
                 findNavController().navigate(R.id.action_scanner_to_result, bundle)
             } catch (e: Exception) {
@@ -67,8 +78,24 @@ class ScannerFragment : Fragment(R.layout.fragment_scanner) {
 
         // Inisialisasi tint tombol flash
         binding.btnFlash.setColorFilter(
-            ContextCompat.getColor(requireContext(), R.color.brand_dark_charcoal)
+            ContextCompat.getColor(requireContext(), R.color.brand_surface_white)
         )
+
+        // Animasi retikel berdenyut halus (subtle pulse effect) untuk umpan balik visual scanner
+        binding.imgReticle.animate()
+            .scaleX(1.04f)
+            .scaleY(1.04f)
+            .alpha(0.85f)
+            .setDuration(1200)
+            .withEndAction {
+                binding.imgReticle.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .alpha(1.0f)
+                    .setDuration(1200)
+                    .start()
+            }
+            .start()
 
         checkPermissions()
 
@@ -91,7 +118,7 @@ class ScannerFragment : Fragment(R.layout.fragment_scanner) {
                     )
                 } else {
                     binding.btnFlash.setColorFilter(
-                        ContextCompat.getColor(requireContext(), R.color.brand_dark_charcoal)
+                        ContextCompat.getColor(requireContext(), R.color.brand_surface_white)
                     )
                 }
             } else {
@@ -155,34 +182,45 @@ class ScannerFragment : Fragment(R.layout.fragment_scanner) {
             }
             .start()
 
-        val photoFile = File(
+        // Simpan foto di cacheDir sebagai berkas sementara (prefiks TEMP_).
+        // ResultFragment akan memindahkannya ke filesDir (permanen) saat pengguna menekan Simpan.
+        val tempFile = File(
             requireContext().cacheDir,
-            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(System.currentTimeMillis()) + ".jpg"
+            "TEMP_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(System.currentTimeMillis())}.jpg"
         )
+        pendingTempFile = tempFile
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(tempFile).build()
 
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    // Aktifkan kembali kontrol sebelum berpindah layar
+                    if (_binding == null || !isAdded) return
                     binding.btnCapture.isEnabled = true
                     binding.btnGallery.isEnabled = true
                     binding.btnFlash.isEnabled = true
 
                     val bundle = Bundle().apply {
-                        putString("imagePath", photoFile.absolutePath)
+                        putString("imagePath", tempFile.absolutePath)
+                        putBoolean("isReadOnly", false)
                     }
-                    findNavController().navigate(R.id.action_scanner_to_result, bundle)
+                    try {
+                        findNavController().navigate(R.id.action_scanner_to_result, bundle)
+                    } catch (e: Exception) {
+                        // Ignored if navigation triggered during teardown
+                    }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    // Aktifkan kembali kontrol jika terjadi galat
+                    if (_binding == null || !isAdded) return
                     binding.btnCapture.isEnabled = true
                     binding.btnGallery.isEnabled = true
                     binding.btnFlash.isEnabled = true
+                    // Bersihkan file sementara yang gagal
+                    pendingTempFile?.delete()
+                    pendingTempFile = null
                     Toast.makeText(context, getString(R.string.photo_failed), Toast.LENGTH_SHORT).show()
                 }
             }

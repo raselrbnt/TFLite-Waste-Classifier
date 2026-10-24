@@ -14,12 +14,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ScanHistoryAdapter : ListAdapter<ScanEntity, ScanHistoryAdapter.ViewHolder>(DiffCallback) {
+class ScanHistoryAdapter(
+    private val onItemClick: (ScanEntity) -> Unit,
+    private val onDeleteClick: (ScanEntity) -> Unit
+) : ListAdapter<ScanEntity, ScanHistoryAdapter.ViewHolder>(DiffCallback) {
 
     class ViewHolder(private val binding: ItemScanHistoryBinding) : RecyclerView.ViewHolder(binding.root) {
         private val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
 
-        fun bind(scan: ScanEntity) {
+        fun bind(scan: ScanEntity, onItemClick: (ScanEntity) -> Unit, onDeleteClick: (ScanEntity) -> Unit) {
             val context = binding.root.context
             binding.tvHistoryCategory.text = scan.category
             binding.tvHistoryConfidence.text = String.format(
@@ -28,21 +31,49 @@ class ScanHistoryAdapter : ListAdapter<ScanEntity, ScanHistoryAdapter.ViewHolder
             )
             binding.tvHistoryDate.text = dateFormat.format(Date(scan.timestamp))
 
-            // Dapatkan warna berdasarkan kategori
-            if (scan.category == "TIDAK TERDETEKSI") {
-                binding.tvHistoryCategory.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.brand_warning_red))
-                binding.viewHistoryIndicator.setBackgroundColor(androidx.core.content.ContextCompat.getColor(context, R.color.brand_warning_red))
-            } else {
-                binding.tvHistoryCategory.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.brand_dark_charcoal))
-                binding.viewHistoryIndicator.setBackgroundColor(androidx.core.content.ContextCompat.getColor(context, R.color.brand_neon))
+            // Dapatkan warna indikator berdasarkan kategori (Organik vs Anorganik vs Tidak Terdeteksi)
+            val indicatorColorRes = when {
+                scan.category == "TIDAK TERDETEKSI" -> R.color.brand_warning_red
+                scan.category.contains("ORGANIK") -> R.color.brand_primary
+                else -> R.color.brand_neon
             }
+            val indicatorColor = androidx.core.content.ContextCompat.getColor(context, indicatorColorRes)
+            binding.tvHistoryCategory.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.brand_dark_charcoal))
+            binding.viewHistoryIndicator.setBackgroundColor(indicatorColor)
 
-            // Load image from internal storage path
+            // Load image with downsampling to optimize RAM memory and ensure 60fps smooth scrolling
             val imgFile = File(scan.imagePath)
             if (imgFile.exists()) {
-                val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeFile(imgFile.absolutePath, options)
+                options.inSampleSize = calculateInSampleSize(options, 120, 120)
+                options.inJustDecodeBounds = false
+                val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath, options)
                 binding.imgHistory.setImageBitmap(bitmap)
             }
+
+            binding.root.setOnClickListener {
+                onItemClick(scan)
+            }
+
+            binding.btnDeleteHistory.setOnClickListener {
+                onDeleteClick(scan)
+            }
+        }
+
+        private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+            val (height: Int, width: Int) = options.run { outHeight to outWidth }
+            var inSampleSize = 1
+            if (height > reqHeight || width > reqWidth) {
+                val halfHeight: Int = height / 2
+                val halfWidth: Int = width / 2
+                while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                    inSampleSize *= 2
+                }
+            }
+            return inSampleSize
         }
     }
 
@@ -52,7 +83,7 @@ class ScanHistoryAdapter : ListAdapter<ScanEntity, ScanHistoryAdapter.ViewHolder
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), onItemClick, onDeleteClick)
     }
 
     companion object DiffCallback : DiffUtil.ItemCallback<ScanEntity>() {

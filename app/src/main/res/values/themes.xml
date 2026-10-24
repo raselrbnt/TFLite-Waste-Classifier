@@ -20,20 +20,21 @@
         <item name="backgroundTint">@color/brand_neon</item>
         <item name="android:textColor">@color/brand_dark_charcoal</item>
         <item name="fontFamily">@font/space_grotesk_bold</item>
-        <item name="cornerRadius">4dp</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
         <item name="android:textSize">14sp</item>
+        <item name="elevation">2dp</item>
     </style>
 
     <!-- Gaya Tombol Sekunder Borderless/Outlined -->
     <style name="Widget.EcoTech.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="strokeColor">@color/brand_dark_charcoal</item>
-        <item name="strokeWidth">1dp</item>
+        <item name="strokeWidth">1.5dp</item>
         <item name="android:textColor">@color/brand_dark_charcoal</item>
-        <item name="fontFamily">@font/space_grotesk_medium</item>
-        <item name="cornerRadius">4dp</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingBottom">12dp</item>
+        <item name="fontFamily">@font/space_grotesk_bold</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
     </style>
 </resources>

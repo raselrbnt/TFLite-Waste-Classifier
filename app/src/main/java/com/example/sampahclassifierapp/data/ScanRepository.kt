@@ -12,4 +12,8 @@ class ScanRepository(private val scanDao: ScanDao) {
     suspend fun insert(scan: ScanEntity) {
         scanDao.insertScan(scan)
     }
+
+    suspend fun delete(scan: ScanEntity) {
+        scanDao.deleteScan(scan)
+    }
 }

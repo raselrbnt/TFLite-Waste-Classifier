@@ -5,14 +5,19 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+/**
+ * Database utama aplikasi.
+ * Hanya memuat satu entitas aktif: ScanEntity (tabel scan_history).
+ * Entitas LearnDatabaseEntity dihapus karena tab "Basis Data" menggunakan
+ * data statis in-memory (LearnEntity) dan tidak membutuhkan persistensi SQLite.
+ */
 @Database(
-    entities = [ScanEntity::class, LearnDatabaseEntity::class],
-    version = 1,
+    entities = [ScanEntity::class],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun scanDao(): ScanDao
-    abstract fun learnDao(): LearnDao
 
     companion object {
         @Volatile

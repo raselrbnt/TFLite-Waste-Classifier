@@ -1,9 +1,16 @@
 package com.example.sampahclassifierapp.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "scan_history")
+@Entity(
+    tableName = "scan_history",
+    indices = [
+        Index(value = ["timestamp"]),
+        Index(value = ["category"])
+    ]
+)
 data class ScanEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val category: String,       // ORGANIK, ANORGANIK, TIDAK TERDETEKSI

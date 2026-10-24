@@ -11,3 +11,10 @@
 local.properties
 *.ipr
 *.iws
+.kotlin/
+
+# Local docs & thesis drafts (private / do not upload)
+docs/
+
+# ML training notebooks & experiments
+# model-ml/

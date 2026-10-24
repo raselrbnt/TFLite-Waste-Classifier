@@ -35,30 +35,76 @@
             app:layout_constraintHorizontal_bias="0.4" />
 
         <!-- Captured Image Container -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_image_container"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_image_container"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="20dp"
-            android:background="@android:color/black"
+            android:layout_height="260dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/black"
             app:layout_constraintTop_toBottomOf="@id/btn_back">
 
-            <ImageView
-                android:id="@+id/img_captured"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
+                android:layout_height="match_parent">
 
-            <!-- Neon Green bottom highlight indicator line under image -->
-            <View
-                android:id="@+id/view_result_indicator"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:background="@color/brand_neon"
-                app:layout_constraintBottom_toBottomOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageView
+                    android:id="@+id/img_captured"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop" />
 
-        <!-- Confidence Rating Text -->
+                <!-- Floating Chip: Inference Speed -->
+                <TextView
+                    android:id="@+id/tv_chip_inference_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ 48 ms"
+                    android:textColor="@color/brand_neon"
+                    android:fontFamily="@font/space_grotesk_bold"
+                    android:textSize="11sp"
+                    android:background="@drawable/bg_chip_dark"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:layout_margin="12dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <!-- Floating Chip: Offline Mode Indicator / Read-Only Indicator -->
+                <TextView
+                    android:id="@+id/tv_chip_offline_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📱 OFFLINE ML"
+                    android:textColor="@color/brand_surface_white"
+                    android:fontFamily="@font/space_grotesk_bold"
+                    android:textSize="11sp"
+                    android:background="@drawable/bg_chip_dark"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:layout_margin="12dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Confidence Rating Horizontal Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progress_confidence"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_marginTop="16dp"
+            android:progress="98"
+            android:max="100"
+            android:progressDrawable="@drawable/bg_confidence_progress"
+            app:layout_constraintTop_toBottomOf="@id/card_image_container"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Confidence Rating Text Label -->
         <TextView
             android:id="@+id/tv_lbl_confidence"
             android:layout_width="wrap_content"
@@ -66,23 +112,23 @@
             android:text="TINGKAT KEPERCAYAAN: 98.4%"
             android:textColor="@color/brand_text_secondary"
             android:fontFamily="@font/space_grotesk_medium"
-            android:textSize="11sp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/layout_image_container"
+            android:textSize="12sp"
+            android:letterSpacing="0.04"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/progress_confidence"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Classification Category -->
+        <!-- Classification Category Result -->
         <TextView
             android:id="@+id/tv_classification_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ORGANIK"
-            android:textColor="@color/brand_neon"
-            android:shadowColor="#33000000"
-            android:shadowRadius="2"
+            android:textColor="@color/brand_primary"
             android:fontFamily="@font/space_grotesk_bold"
             android:textSize="36sp"
+            android:layout_marginTop="2dp"
             app:layout_constraintTop_toBottomOf="@id/tv_lbl_confidence"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -92,9 +138,12 @@
             android:id="@+id/card_instructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/bg_card_minimal"
             android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             app:layout_constraintTop_toBottomOf="@id/tv_classification_result">
 
             <TextView
@@ -104,9 +153,19 @@
                 android:text="ⓘ INSTRUKSI PENANGANAN"
                 android:textColor="@color/brand_dark_charcoal"
                 android:fontFamily="@font/space_grotesk_bold"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
+
+            <ImageView
+                android:id="@+id/img_instructions_chevron"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron"
+                app:tint="@color/brand_dark_charcoal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/lbl_instructions_header"
+                app:layout_constraintBottom_toBottomOf="@id/lbl_instructions_header" />
 
             <!-- Dynamic bullet instructions in vertical layout -->
             <LinearLayout
@@ -126,9 +185,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="> "
+                        android:text="• "
                         android:textColor="@color/brand_primary"
-                        android:fontFamily="@font/space_grotesk_bold" />
+                        android:fontFamily="@font/space_grotesk_bold"
+                        android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tv_bullet_1"
                         android:layout_width="match_parent"
@@ -148,9 +208,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="> "
+                        android:text="• "
                         android:textColor="@color/brand_primary"
-                        android:fontFamily="@font/space_grotesk_bold" />
+                        android:fontFamily="@font/space_grotesk_bold"
+                        android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tv_bullet_2"
                         android:layout_width="match_parent"
@@ -169,9 +230,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="> "
+                        android:text="• "
                         android:textColor="@color/brand_primary"
-                        android:fontFamily="@font/space_grotesk_bold" />
+                        android:fontFamily="@font/space_grotesk_bold"
+                        android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tv_bullet_3"
                         android:layout_width="match_parent"
@@ -186,30 +248,41 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Action Buttons -->
-        <Button
-            android:id="@+id/btn_pindai_lainnya"
-            style="@style/Widget.EcoTech.Button.Neon"
+        <!-- 2-Column Action Buttons Row -->
+        <LinearLayout
+            android:id="@+id/layout_action_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PINDAI LAINNYA"
-            app:icon="@android:drawable/ic_menu_camera"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/card_instructions" />
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/card_instructions"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
-            android:id="@+id/btn_simpan_catatan"
-            style="@style/Widget.EcoTech.Button.Outlined"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="SIMPAN KE CATATAN"
-            app:icon="@android:drawable/ic_menu_save"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/btn_pindai_lainnya" />
+            <Button
+                android:id="@+id/btn_pindai_lainnya"
+                style="@style/Widget.EcoTech.Button.Neon"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="PINDAI LAINNYA"
+                android:textSize="12sp"
+                android:layout_marginEnd="6dp" />
+
+            <Button
+                android:id="@+id/btn_simpan_catatan"
+                style="@style/Widget.EcoTech.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="SIMPAN CATATAN"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_total_scans"
+                app:iconSize="16dp"
+                app:iconGravity="textStart"
+                android:layout_marginStart="6dp" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
