@@ -1,26 +1,34 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="250dp"
-    android:height="250dp"
+    android:width="260dp"
+    android:height="260dp"
     android:viewportWidth="250"
     android:viewportHeight="250">
     <!-- Sudut Kiri Atas -->
     <path
-        android:pathData="M 10 30 L 10 10 L 30 10"
+        android:pathData="M 15,50 L 15,25 Q 15,15 25,15 L 50,15"
         android:strokeColor="@color/brand_neon"
-        android:strokeWidth="4" />
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
     <!-- Sudut Kanan Atas -->
     <path
-        android:pathData="M 220 10 L 240 10 L 240 30"
+        android:pathData="M 200,15 L 225,15 Q 235,15 235,25 L 235,50"
         android:strokeColor="@color/brand_neon"
-        android:strokeWidth="4" />
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
     <!-- Sudut Kiri Bawah -->
     <path
-        android:pathData="M 10 220 L 10 240 L 30 240"
+        android:pathData="M 15,200 L 15,225 Q 15,235 25,235 L 50,235"
         android:strokeColor="@color/brand_neon"
-        android:strokeWidth="4" />
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
     <!-- Sudut Kanan Bawah -->
     <path
-        android:pathData="M 220 240 L 240 240 L 240 220"
+        android:pathData="M 200,235 L 225,235 Q 235,235 235,225 L 235,200"
         android:strokeColor="@color/brand_neon"
-        android:strokeWidth="4" />
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
 </vector>

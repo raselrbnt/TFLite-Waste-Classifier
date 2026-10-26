@@ -12,6 +12,10 @@ android {
         enable = true
     }
 
+    androidResources {
+        noCompress += "tflite"
+    }
+
     defaultConfig {
         applicationId = "com.example.sampahclassifierapp"
         minSdk = 24

@@ -4,9 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import org.tensorflow.lite.Interpreter
 import java.io.BufferedReader
+import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.channels.FileChannel
 
 /**
  * Implementasi WasteClassifier menggunakan TensorFlow Lite.
@@ -25,8 +27,9 @@ class WasteClassifier(context: Context) {
 
     init {
         try {
-            labels = loadLabels(context, "labels.txt")
-            initializeInterpreter(context)
+            val appContext = context.applicationContext ?: context
+            labels = loadLabels(appContext, "labels.txt")
+            initializeInterpreter(appContext)
         } catch (e: Exception) {
             throw RuntimeException("Gagal memuat model ML: ${e.message}", e)
         }
@@ -42,31 +45,31 @@ class WasteClassifier(context: Context) {
                 }
             }
         } catch (e: Exception) {
-            listOf("ORGANIK", "ANORGANIK")
+            listOf("ANORGANIK", "ORGANIK")
         }
     }
 
     fun classify(bitmap: Bitmap): Recognition {
         try {
             val interp = getInterpreter() ?: throw RuntimeException("Interpreter tidak terinisialisasi")
-            
+
             // Resize bitmap ke ukuran input model (224x224)
             val resizedBitmap = Bitmap.createScaledBitmap(bitmap, inputSize, inputSize, true)
-            
+
             // Konversi piksel bitmap ke direct ByteBuffer Float32
             // 4 bytes per float (Float32) * 224 * 224 * 3 channels
             val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3).apply {
                 order(ByteOrder.nativeOrder())
             }
-            
+
             val pixels = IntArray(inputSize * inputSize)
             resizedBitmap.getPixels(pixels, 0, inputSize, 0, 0, inputSize, inputSize)
-            
+
             // Recycle resizedBitmap secara langsung jika merupakan instansi baru (hemat memori)
             if (resizedBitmap != bitmap) {
                 resizedBitmap.recycle()
             }
-            
+
             for (pixel in pixels) {
                 val r = ((pixel shr 16) and 0xFF) / 255.0f
                 val g = ((pixel shr 8) and 0xFF) / 255.0f
@@ -89,7 +92,7 @@ class WasteClassifier(context: Context) {
             val results = outputBuffer[0]
             var maxIdx = -1
             var maxScore = -1f
-            
+
             for (i in results.indices) {
                 if (results[i] > maxScore) {
                     maxScore = results[i]
@@ -126,6 +129,7 @@ class WasteClassifier(context: Context) {
     }
 
     companion object {
+        @Volatile
         private var sharedInterpreter: Interpreter? = null
 
         /**
@@ -133,7 +137,7 @@ class WasteClassifier(context: Context) {
          */
         fun isModelAvailable(context: Context): Boolean {
             return try {
-                initializeInterpreter(context)
+                initializeInterpreter(context.applicationContext ?: context)
                 sharedInterpreter != null
             } catch (e: Exception) {
                 false
@@ -143,18 +147,20 @@ class WasteClassifier(context: Context) {
         @Synchronized
         private fun initializeInterpreter(context: Context) {
             if (sharedInterpreter == null) {
-                // Memuat file TFLite menggunakan Memory Mapping (mmap)
-                val fileDescriptor = context.assets.openFd("model_sampah.tflite")
-                val inputStream = java.io.FileInputStream(fileDescriptor.fileDescriptor)
-                val fileChannel = inputStream.channel
-                val startOffset = fileDescriptor.startOffset
-                val declaredLength = fileDescriptor.declaredLength
-                val buffer = fileChannel.map(
-                    java.nio.channels.FileChannel.MapMode.READ_ONLY, 
-                    startOffset, 
-                    declaredLength
-                )
-                sharedInterpreter = Interpreter(buffer)
+                // Memuat file TFLite menggunakan Memory Mapping (mmap) dan menutup stream dengan aman
+                val buffer = context.assets.openFd("model_sampah.tflite").use { fileDescriptor ->
+                    FileInputStream(fileDescriptor.fileDescriptor).use { inputStream ->
+                        inputStream.channel.map(
+                            FileChannel.MapMode.READ_ONLY,
+                            fileDescriptor.startOffset,
+                            fileDescriptor.declaredLength
+                        )
+                    }
+                }
+                val options = Interpreter.Options().apply {
+                    setNumThreads(4)
+                }
+                sharedInterpreter = Interpreter(buffer, options)
             }
         }
 

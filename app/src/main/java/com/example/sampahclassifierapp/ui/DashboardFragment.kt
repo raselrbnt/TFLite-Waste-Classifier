@@ -4,15 +4,20 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.sampahclassifierapp.R
 import com.example.sampahclassifierapp.data.AppDatabase
 import com.example.sampahclassifierapp.data.ScanRepository
 import com.example.sampahclassifierapp.databinding.FragmentDashboardBinding
 import com.example.sampahclassifierapp.ml.WasteClassifier
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
@@ -32,46 +37,85 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         setupStatistics()
         setupMlSystemStatus()
 
-        // Tombol navigasi ke Scanner
+        // Tombol navigasi ke Scanner (sinkron dengan BottomNavigationView & aman dari double-tap)
         binding.btnMulaiPemindai.setOnClickListener {
-            findNavController().navigate(R.id.action_dashboard_to_scanner)
+            navigateToTab(R.id.navigation_scanner, R.id.action_dashboard_to_scanner)
+        }
+
+        // Kartu statistik dapat diketuk untuk langsung melihat riwayat di tab Catatan
+        val openHistoryListener = View.OnClickListener {
+            val bottomNav = activity?.findViewById<BottomNavigationView>(R.id.bottom_navigation)
+            if (bottomNav != null) {
+                bottomNav.selectedItemId = R.id.navigation_history
+            }
+        }
+        binding.gridTotalScan.setOnClickListener(openHistoryListener)
+        binding.gridOrganik.setOnClickListener(openHistoryListener)
+        binding.gridAnorganik.setOnClickListener(openHistoryListener)
+    }
+
+    private fun navigateToTab(tabId: Int, fallbackActionId: Int) {
+        if (!isAdded || _binding == null) return
+        val bottomNav = activity?.findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        if (bottomNav != null) {
+            bottomNav.selectedItemId = tabId
+        } else {
+            try {
+                val navController = findNavController()
+                if (navController.currentDestination?.id == R.id.navigation_dashboard) {
+                    navController.navigate(fallbackActionId)
+                }
+            } catch (e: Exception) {
+                // Abaikan jika transisi navigasi sedang berlangsung
+            }
         }
     }
 
     private fun setupMlSystemStatus() {
-        val isMlActive = WasteClassifier.isModelAvailable(requireContext())
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            val isMlActive = withContext(Dispatchers.IO) {
+                WasteClassifier.isModelAvailable(appContext)
+            }
+            val currentBinding = _binding ?: return@launch
+            if (!isAdded) return@launch
 
-        if (isMlActive) {
-            binding.tvStatusTitle.text = "SYSTEM ACTIVE"
-            binding.tvStatusTitle.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.brand_primary)
-            )
-            binding.tvStatusSubtitle.text = "Status: Model TFLite offline siap digunakan."
-        } else {
-            binding.tvStatusTitle.text = "SYSTEM ERROR"
-            binding.tvStatusTitle.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.brand_warning_red)
-            )
-            binding.tvStatusSubtitle.text = "Status: Gagal memuat file model sampah."
+            if (isMlActive) {
+                currentBinding.tvStatusTitle.text = "SYSTEM ACTIVE"
+                currentBinding.tvStatusTitle.setTextColor(
+                    ContextCompat.getColor(requireContext(), R.color.brand_primary)
+                )
+                currentBinding.tvStatusSubtitle.text = "Status: Model TFLite offline siap digunakan."
+                currentBinding.tvStandby.text = "[ ML CORE STANDBY ]"
+            } else {
+                currentBinding.tvStatusTitle.text = "SYSTEM ERROR"
+                currentBinding.tvStatusTitle.setTextColor(
+                    ContextCompat.getColor(requireContext(), R.color.brand_warning_red)
+                )
+                currentBinding.tvStatusSubtitle.text = "Status: Gagal memuat file model sampah."
+                currentBinding.tvStandby.text = "[ ML CORE ERROR ]"
+            }
         }
     }
 
     private fun setupStatistics() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.totalCount.collectLatest { count ->
-                binding.valTotalScan.text = count.toString()
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repository.organikCount.collectLatest { count ->
-                binding.valOrganik.text = count.toString()
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repository.anorganikCount.collectLatest { count ->
-                binding.valAnorganik.text = count.toString()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    repository.totalCount.collectLatest { count ->
+                        _binding?.valTotalScan?.text = count.toString()
+                    }
+                }
+                launch {
+                    repository.organikCount.collectLatest { count ->
+                        _binding?.valOrganik?.text = count.toString()
+                    }
+                }
+                launch {
+                    repository.anorganikCount.collectLatest { count ->
+                        _binding?.valAnorganik?.text = count.toString()
+                    }
+                }
             }
         }
     }

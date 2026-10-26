@@ -5,14 +5,19 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     android:background="@drawable/bg_card_minimal"
-    android:padding="12dp">
+    android:padding="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
+    <!-- Card Container for Thumbnail Image with Rounded Corners -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_image"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="0dp"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -25,18 +30,24 @@
             android:src="@android:drawable/ic_menu_gallery" />
     </androidx.cardview.widget.CardView>
 
+    <!-- Category Title (ORGANIK / ANORGANIK) -->
     <TextView
         android:id="@+id/tv_history_category"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
         android:fontFamily="@font/space_grotesk_bold"
         android:text="ORGANIK"
         android:textColor="@color/brand_dark_charcoal"
-        android:textSize="14sp"
+        android:textSize="16sp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        app:layout_constraintEnd_toStartOf="@id/btn_delete_history"
         app:layout_constraintStart_toEndOf="@id/card_image"
         app:layout_constraintTop_toTopOf="@id/card_image" />
 
+    <!-- Confidence Level text -->
     <TextView
         android:id="@+id/tv_history_confidence"
         android:layout_width="wrap_content"
@@ -44,26 +55,45 @@
         android:fontFamily="@font/dm_sans_regular"
         android:text="98.4% Confidence"
         android:textColor="@color/brand_text_secondary"
-        android:textSize="12sp"
+        android:textSize="13sp"
+        android:layout_marginTop="2dp"
         app:layout_constraintStart_toStartOf="@id/tv_history_category"
         app:layout_constraintTop_toBottomOf="@id/tv_history_category" />
 
+    <!-- Timestamp text -->
     <TextView
         android:id="@+id/tv_history_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/dm_sans_regular"
-        android:text="12 Oct 2023, 14:20"
+        android:text="12 Oct 2026, 14:20"
         android:textColor="@color/brand_text_secondary"
         android:textSize="11sp"
         app:layout_constraintBottom_toBottomOf="@id/card_image"
         app:layout_constraintStart_toStartOf="@id/tv_history_category" />
 
+    <!-- Red Rounded Delete Button (Matching Reference UI) -->
+    <ImageButton
+        android:id="@+id/btn_delete_history"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/bg_btn_delete_rounded"
+        android:contentDescription="Hapus Riwayat"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@android:drawable/ic_menu_delete"
+        app:tint="@color/brand_surface_white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/view_history_indicator"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Colored Category Signature Indicator (Green / Blue / Red) -->
     <View
         android:id="@+id/view_history_indicator"
-        android:layout_width="4dp"
+        android:layout_width="5dp"
         android:layout_height="0dp"
-        android:background="@color/brand_neon"
+        android:background="@color/brand_primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -1,7 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.SampahClassifierApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <!-- Selaraskan tema malam dengan Light Mode Eco-Tech agar konsisten di semua pengaturan perangkat -->
+    <style name="Theme.SampahClassifierApp" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryVariant">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/brand_surface_white</item>
+
+        <item name="android:statusBarColor">@color/brand_bg_light</item>
+        <item name="android:windowBackground">@color/brand_bg_light</item>
+        <item name="android:navigationBarColor">@color/brand_bg_light</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

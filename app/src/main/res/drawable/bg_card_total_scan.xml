@@ -4,14 +4,14 @@
     <item>
         <shape>
             <solid android:color="@color/brand_surface_dim" />
-            <corners android:radius="4dp" />
+            <corners android:radius="12dp" />
         </shape>
     </item>
     <!-- Border bawah neon green -->
-    <item android:top="76dp">
+    <item android:top="74dp">
         <shape>
             <solid android:color="@color/brand_neon" />
-            <corners android:bottomLeftRadius="4dp" android:bottomRightRadius="4dp" />
+            <corners android:bottomLeftRadius="12dp" android:bottomRightRadius="12dp" />
         </shape>
     </item>
 </layer-list>

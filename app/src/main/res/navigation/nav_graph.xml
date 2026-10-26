@@ -37,15 +37,39 @@
         android:id="@+id/navigation_history"
         android:name="com.example.sampahclassifierapp.ui.HistoryFragment"
         android:label="Riwayat &amp; Pelajari"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history">
+        <action
+            android:id="@+id/action_history_to_result"
+            app:destination="@id/navigation_result"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_result"
         android:name="com.example.sampahclassifierapp.ui.ResultFragment"
         android:label="Hasil Analisis"
         tools:layout="@layout/fragment_result">
+        <!-- Path foto: diisi ScannerFragment saat pindai baru, diisi HistoryFragment saat pratinjau -->
         <argument
             android:name="imagePath"
             app:argType="string" />
+        <!-- true = mode pratinjau riwayat (tidak menjalankan inferensi ulang) -->
+        <argument
+            android:name="isReadOnly"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <!-- Kategori tersimpan dari Room DB, dipakai saat isReadOnly=true -->
+        <argument
+            android:name="savedCategory"
+            app:argType="string"
+            android:defaultValue="" />
+        <!-- Confidence tersimpan (%), dipakai saat isReadOnly=true -->
+        <argument
+            android:name="savedConfidence"
+            app:argType="float"
+            android:defaultValue="0" />
     </fragment>
 </navigation>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Palet Lumina Tech-Eco -->
-    <color name="brand_primary">#006E16</color>           <!-- Accessible Green untuk teks status -->
-    <color name="brand_neon">#00FF41</color>              <!-- Neon Green untuk CTA, retikel, status aktif -->
-    <color name="brand_dark_charcoal">#121414</color>     <!-- Teks utama -->
-    <color name="brand_bg_light">#F8F9FB</color>          <!-- Latar belakang aplikasi -->
-    <color name="brand_surface_white">#FFFFFF</color>     <!-- Latar belakang kartu/surface -->
-    <color name="brand_surface_dim">#F3F4F6</color>       <!-- Kartu sekunder/batas tipis -->
-    <color name="brand_text_secondary">#6B7280</color>    <!-- Label / stempel waktu -->
-    <color name="brand_warning_red">#FF3366</color>       <!-- Aksen sampah berbahaya (B3) -->
+    <!-- Palet Eco-Tech Modern & Nyaman -->
+    <color name="brand_primary">#0A5C28</color>           <!-- Forest Green - Aksesibel & Kontras Tinggi -->
+    <color name="brand_neon">#00E676</color>              <!-- Vibrant Emerald Neon - Aksen Modern -->
+    <color name="brand_dark_charcoal">#17191C</color>     <!-- Charcoal Slate - Teks Utama & Header -->
+    <color name="brand_bg_light">#F5F7F5</color>          <!-- Soft Mint Light Background - Nyaman di Mata -->
+    <color name="brand_surface_white">#FFFFFF</color>     <!-- Pure White Card Surface -->
+    <color name="brand_surface_dim">#E8EFE9</color>       <!-- Border & Card Accent -->
+    <color name="brand_text_secondary">#5C646A</color>    <!-- Subtitle / Timestamp -->
+    <color name="brand_warning_red">#FF4D4D</color>       <!-- Crimson Red - Peringatan / Hapus -->
 
     <!-- Warna Tambahan / Transparan -->
-    <color name="glass_bottom_bar">#B3FFFFFF</color>      <!-- Putih transparan 70% untuk panel scanner -->
-    <color name="outline_variant">#EDEFE0</color>
+    <color name="glass_bottom_bar">#D9FFFFFF</color>      <!-- Glassmorphic Translucent White -->
+    <color name="outline_variant">#D6E3D8</color>
 </resources>

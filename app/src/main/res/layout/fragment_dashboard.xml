@@ -1,5 +1,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -13,9 +14,9 @@
         <!-- Header Bar -->
         <ImageView
             android:id="@+id/img_logo"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_compass"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_eco_leaf_logo"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -50,6 +51,16 @@
             android:layout_marginTop="24dp"
             app:layout_constraintTop_toBottomOf="@id/divider_header">
 
+            <!-- Live Glowing Green Dot Indicator -->
+            <View
+                android:id="@+id/view_status_dot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/bg_btn_capture"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_status_title"
+                app:layout_constraintBottom_toBottomOf="@id/tv_status_title" />
+
             <TextView
                 android:id="@+id/tv_status_title"
                 android:layout_width="wrap_content"
@@ -58,8 +69,9 @@
                 android:textColor="@color/brand_primary"
                 android:fontFamily="@font/space_grotesk_bold"
                 android:textSize="16sp"
+                android:layout_marginStart="8dp"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toEndOf="@id/view_status_dot" />
 
             <TextView
                 android:id="@+id/tv_status_subtitle"
@@ -90,9 +102,10 @@
 
         <ImageView
             android:id="@+id/ic_chart"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@android:drawable/arrow_up_float"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_impact_trend"
+            app:tint="@color/brand_primary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv_dampak_harian"
             app:layout_constraintBottom_toBottomOf="@id/tv_dampak_harian" />
@@ -106,6 +119,9 @@
             android:background="@drawable/bg_card_total_scan"
             android:padding="12dp"
             android:layout_marginTop="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             app:layout_constraintTop_toBottomOf="@id/tv_dampak_harian"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -121,11 +137,20 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_total_scans"
+                app:tint="@color/brand_primary"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <TextView
                 android:id="@+id/val_total_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="124"
+                android:text="0"
+                tools:text="124"
                 android:textSize="24sp"
                 android:textColor="@color/brand_primary"
                 android:fontFamily="@font/space_grotesk_bold"
@@ -142,6 +167,9 @@
             android:padding="12dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             app:layout_constraintTop_toBottomOf="@id/grid_total_scan"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintHorizontal_weight="1"
@@ -158,11 +186,20 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_organic_apple"
+                app:tint="@color/brand_primary"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <TextView
                 android:id="@+id/val_organik"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="82"
+                android:text="0"
+                tools:text="82"
                 android:textSize="24sp"
                 android:textColor="@color/brand_dark_charcoal"
                 android:fontFamily="@font/space_grotesk_bold"
@@ -179,6 +216,9 @@
             android:padding="12dp"
             android:layout_marginTop="12dp"
             android:layout_marginStart="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             app:layout_constraintTop_toBottomOf="@id/grid_total_scan"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_weight="1"
@@ -195,11 +235,20 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_recycle_bin"
+                app:tint="@color/brand_primary"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <TextView
                 android:id="@+id/val_anorganik"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="38"
+                android:text="0"
+                tools:text="38"
                 android:textSize="24sp"
                 android:textColor="@color/brand_dark_charcoal"
                 android:fontFamily="@font/space_grotesk_bold"

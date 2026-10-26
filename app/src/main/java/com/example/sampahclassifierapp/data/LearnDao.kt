@@ -5,6 +5,12 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * @deprecated Arsip kode lama. Tab "Basis Data" menggunakan model in-memory [LearnEntity].
+ * DAO ini tidak lagi terdaftar pada [AppDatabase] dan dipertahankan hanya sebagai referensi historis.
+ */
+@Deprecated("Tab Basis Data menggunakan in-memory LearnEntity. DAO ini tidak lagi aktif di AppDatabase.")
+@Suppress("DEPRECATION")
 @Dao
 interface LearnDao {
     @Query("SELECT * FROM learn_database ORDER BY id ASC")
