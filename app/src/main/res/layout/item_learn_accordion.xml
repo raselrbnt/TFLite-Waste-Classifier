@@ -4,6 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
     app:cardBackgroundColor="@color/brand_surface_white"
     app:cardCornerRadius="12dp"
     app:cardElevation="1dp">
@@ -17,7 +20,8 @@
             android:id="@+id/img_learn_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@android:drawable/ic_dialog_info"
+            android:src="@drawable/ic_eco_leaf_logo"
+            app:tint="@color/brand_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,6 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
             android:fontFamily="@font/space_grotesk_bold"
             android:text="KATEGORI SAMPAH"
             android:textColor="@color/brand_dark_charcoal"
@@ -39,9 +44,11 @@
             android:id="@+id/img_expand_arrow"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@android:drawable/arrow_down_float"
+            android:src="@drawable/ic_chevron"
+            app:tint="@color/brand_dark_charcoal"
+            app:layout_constraintBottom_toBottomOf="@id/img_learn_icon"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/img_learn_icon" />
 
         <!-- Description (Hidden by default) -->
         <TextView
@@ -50,6 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:fontFamily="@font/dm_sans_regular"
+            android:lineSpacingExtra="4dp"
             android:text="Detail penjelasan panduan pemilahan sampah akan muncul di sini saat kategori di-expand."
             android:textColor="@color/brand_text_secondary"
             android:textSize="13sp"

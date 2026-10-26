@@ -40,8 +40,11 @@ class LearnAdapter : RecyclerView.Adapter<LearnAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         holder.bind(item) {
-            item.isExpanded = !item.isExpanded
-            notifyItemChanged(position)
+            val currentPos = holder.adapterPosition
+            if (currentPos != RecyclerView.NO_POSITION && currentPos in items.indices) {
+                items[currentPos].isExpanded = !items[currentPos].isExpanded
+                notifyItemChanged(currentPos)
+            }
         }
     }
 

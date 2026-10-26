@@ -1,9 +1,13 @@
 package com.example.sampahclassifierapp.ui
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -14,17 +18,20 @@ import com.example.sampahclassifierapp.data.ScanEntity
 import com.example.sampahclassifierapp.data.ScanRepository
 import com.example.sampahclassifierapp.databinding.FragmentResultBinding
 import com.example.sampahclassifierapp.ml.WasteClassifier
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.math.roundToInt
 
 /**
  * Menampilkan hasil klasifikasi sampah.
  *
  * Mendukung dua mode:
  *  - Mode Pindai Baru (isReadOnly = false): Menerima path foto sementara (TEMP_*.jpg di cacheDir),
- *    menjalankan inferensi ML, lalu memindahkan foto ke filesDir secara permanen saat Simpan ditekan.
+ *    menjalankan inferensi ML di thread latar belakang, lalu memindahkan foto ke filesDir secara
+ *    permanen saat Simpan ditekan.
  *
  *  - Mode Pratinjau Riwayat (isReadOnly = true): Menerima path foto permanen beserta data
  *    kategori & confidence yang sudah tersimpan di Room DB. Inferensi ML dilewati,
@@ -36,7 +43,7 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     private val binding get() = _binding!!
 
     private lateinit var repository: ScanRepository
-    private lateinit var classifier: WasteClassifier
+    private var classifier: WasteClassifier? = null
 
     // Path foto sementara (cacheDir) yang akan dipindahkan ke filesDir saat disimpan
     private var tempImagePath: String? = null
@@ -51,17 +58,29 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     // Mode baca saja: true = dibuka dari riwayat, false = pemindaian baru
     private var isReadOnly = false
 
+    // Penanda apakah foto sementara sudah disimpan secara permanen
+    private var isSaved = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentResultBinding.bind(view)
 
         val database = AppDatabase.getDatabase(requireContext())
         repository = ScanRepository(database.scanDao())
-        classifier = WasteClassifier(requireContext())
 
         // Baca argumen navigasi
         isReadOnly = arguments?.getBoolean("isReadOnly", false) ?: false
         tempImagePath = arguments?.getString("imagePath")
+
+        // Tangani tombol Back sistem / gesture agar file sementara tetap dibersihkan
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    handleBack()
+                }
+            }
+        )
 
         if (isReadOnly) {
             setupReadOnlyMode()
@@ -79,9 +98,10 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
 
         // Toggle Expandable Accordion Dropdown Instruksi Penanganan
         binding.cardInstructions.setOnClickListener {
+            val currentBinding = _binding ?: return@setOnClickListener
             isInstructionsExpanded = !isInstructionsExpanded
-            binding.layoutBullets.visibility = if (isInstructionsExpanded) View.VISIBLE else View.GONE
-            binding.imgInstructionsChevron.animate()
+            currentBinding.layoutBullets.visibility = if (isInstructionsExpanded) View.VISIBLE else View.GONE
+            currentBinding.imgInstructionsChevron.animate()
                 .rotation(if (isInstructionsExpanded) 0f else 180f)
                 .setDuration(250)
                 .start()
@@ -98,28 +118,30 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
      * Tombol "Simpan Catatan" disembunyikan untuk mencegah duplikasi data.
      */
     private fun setupReadOnlyMode() {
+        val currentBinding = _binding ?: return
+
         // Sembunyikan tombol Simpan agar pengguna tidak menyimpan ulang data yang sama
-        binding.btnSimpanCatatan.visibility = View.GONE
+        currentBinding.btnSimpanCatatan.visibility = View.GONE
 
         // Ganti teks label chip dari "OFFLINE ML" ke "RIWAYAT" sebagai penanda visual
-        binding.tvChipOfflineMode.text = "📋 RIWAYAT"
+        currentBinding.tvChipOfflineMode.text = "📋 RIWAYAT"
 
         val savedCategory = arguments?.getString("savedCategory") ?: "TIDAK TERDETEKSI"
         val savedConfidence = arguments?.getFloat("savedConfidence") ?: 0f
 
-        // Tampilkan foto dari path permanen (filesDir)
+        // Tampilkan foto dari path permanen (filesDir) secara asinkron
         tempImagePath?.let { path ->
             permanentImagePath = path
-            loadImage(File(path))
+            loadImageAsync(File(path))
         }
 
         // Tampilkan nilai dari database, tanpa chip latensi inferensi
-        binding.tvChipInferenceTime.visibility = View.GONE
+        currentBinding.tvChipInferenceTime.visibility = View.GONE
 
-        val confidencePct = savedConfidence.toInt()
-        binding.progressConfidence.progress = confidencePct
-        binding.tvClassificationResult.text = savedCategory
-        binding.tvLblConfidence.text = getString(R.string.confidence_label, confidencePct)
+        val confidencePct = savedConfidence.roundToInt().coerceIn(0, 100)
+        currentBinding.progressConfidence.progress = confidencePct
+        currentBinding.tvClassificationResult.text = savedCategory
+        currentBinding.tvLblConfidence.text = getString(R.string.confidence_label, confidencePct)
 
         // Warna teks dinamis sesuai kategori
         val colorRes = when {
@@ -127,7 +149,7 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
             savedCategory.contains("ANORGANIK") -> R.color.brand_primary
             else -> R.color.brand_warning_red
         }
-        binding.tvClassificationResult.setTextColor(
+        currentBinding.tvClassificationResult.setTextColor(
             ContextCompat.getColor(requireContext(), colorRes)
         )
 
@@ -144,75 +166,104 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
      * sebelum disimpan ke Room DB.
      */
     private fun setupScanMode() {
-        binding.btnSimpanCatatan.visibility = View.VISIBLE
+        val currentBinding = _binding ?: return
+        currentBinding.btnSimpanCatatan.visibility = View.VISIBLE
+        currentBinding.btnSimpanCatatan.isEnabled = false
 
-        binding.btnSimpanCatatan.setOnClickListener {
+        currentBinding.btnSimpanCatatan.setOnClickListener {
             saveToDatabaseWithPermanentFile()
         }
 
-        displayResult()
+        displayResultAsync()
     }
 
-    private fun displayResult() {
-        tempImagePath?.let { path ->
-            try {
-                val file = File(path)
-                if (file.exists()) {
-                    val bitmap = decodeSampledBitmapFromFile(file, 1024, 1024)
-                    if (bitmap != null && _binding != null) {
-                        binding.imgCaptured.setImageBitmap(bitmap)
+    private fun displayResultAsync() {
+        val path = tempImagePath ?: return
+        val appContext = requireContext().applicationContext
 
-                        try {
-                            val startTime = System.currentTimeMillis()
-                            val result = classifier.classify(bitmap)
-                            val inferenceMs = System.currentTimeMillis() - startTime
-
-                            binding.tvChipInferenceTime.text = "⚡ $inferenceMs ms"
-
-                            // Terapkan ambang batas kepercayaan (confidence threshold) sebesar 70%
-                            val finalResult = if (result.confidence < 0.70f || result.category == "TIDAK_TERDETEKSI") {
-                                WasteClassifier.Recognition(
-                                    category = "TIDAK TERDETEKSI",
-                                    confidence = result.confidence
-                                )
-                            } else {
-                                result
-                            }
-
-                            currentResult = finalResult
-                            val confidencePct = (finalResult.confidence * 100).toInt()
-                            binding.progressConfidence.progress = confidencePct
-                            binding.tvClassificationResult.text = finalResult.category
-                            binding.tvLblConfidence.text = getString(R.string.confidence_label, confidencePct)
-
-                            // Sesuaikan warna teks hasil secara dinamis
-                            val colorRes = when {
-                                finalResult.category.contains("ORGANIK") -> R.color.brand_primary
-                                finalResult.category.contains("ANORGANIK") -> R.color.brand_primary
-                                else -> R.color.brand_warning_red
-                            }
-                            val colorValue = ContextCompat.getColor(requireContext(), colorRes)
-                            binding.tvClassificationResult.setTextColor(colorValue)
-
-                            updateInstructions(finalResult.category)
-                        } catch (e: Exception) {
-                            if (isAdded) {
-                                Toast.makeText(context, getString(R.string.error_classification, e.message), Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    } else {
-                        if (isAdded) {
-                            Toast.makeText(context, getString(R.string.error_image_not_loaded), Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                } else {
-                    if (isAdded) {
-                        Toast.makeText(context, getString(R.string.error_file_not_found), Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val file = File(path)
+            val exists = withContext(Dispatchers.IO) { file.exists() }
+            if (!exists) {
+                if (isAdded && _binding != null) {
+                    context?.let { ctx ->
+                        Toast.makeText(ctx, getString(R.string.error_file_not_found), Toast.LENGTH_SHORT).show()
                     }
                 }
+                return@launch
+            }
+
+            // Decode bitmap + koreksi orientasi EXIF di background IO thread
+            val bitmap = withContext(Dispatchers.IO) {
+                decodeSampledBitmapFromFile(file, 1024, 1024)
+            }
+
+            val currentBinding = _binding
+            if (currentBinding == null || !isAdded) return@launch
+
+            if (bitmap == null) {
+                context?.let { ctx ->
+                    Toast.makeText(ctx, getString(R.string.error_image_not_loaded), Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+
+            currentBinding.imgCaptured.setImageBitmap(bitmap)
+
+            try {
+                // Jalankan inferensi TFLite di Default background dispatcher agar transisi UI mulus
+                val (result, inferenceMs) = withContext(Dispatchers.Default) {
+                    val mlClassifier = classifier ?: WasteClassifier(appContext).also {
+                        classifier = it
+                    }
+                    val startTime = System.currentTimeMillis()
+                    val rec = mlClassifier.classify(bitmap)
+                    val elapsed = System.currentTimeMillis() - startTime
+                    rec to elapsed
+                }
+
+                val b = _binding
+                if (b == null || !isAdded) return@launch
+
+                b.tvChipInferenceTime.visibility = View.VISIBLE
+                b.tvChipInferenceTime.text = "⚡ $inferenceMs ms"
+
+                // Terapkan ambang batas kepercayaan (confidence threshold) sebesar 70%
+                val finalResult = if (result.confidence < 0.70f || result.category == "TIDAK_TERDETEKSI") {
+                    WasteClassifier.Recognition(
+                        category = "TIDAK TERDETEKSI",
+                        confidence = result.confidence
+                    )
+                } else {
+                    result
+                }
+
+                currentResult = finalResult
+                val confidencePct = (finalResult.confidence * 100f).roundToInt().coerceIn(0, 100)
+                b.progressConfidence.progress = confidencePct
+                b.tvClassificationResult.text = finalResult.category
+                b.tvLblConfidence.text = getString(R.string.confidence_label, confidencePct)
+
+                // Sesuaikan warna teks hasil secara dinamis
+                val colorRes = when {
+                    finalResult.category.contains("ORGANIK") -> R.color.brand_primary
+                    finalResult.category.contains("ANORGANIK") -> R.color.brand_primary
+                    else -> R.color.brand_warning_red
+                }
+                val colorValue = ContextCompat.getColor(requireContext(), colorRes)
+                b.tvClassificationResult.setTextColor(colorValue)
+
+                updateInstructions(finalResult.category)
+                b.btnSimpanCatatan.isEnabled = true
             } catch (e: Exception) {
-                if (isAdded) {
-                    Toast.makeText(context, getString(R.string.error_generic, e.message), Toast.LENGTH_LONG).show()
+                if (isAdded && _binding != null) {
+                    context?.let { ctx ->
+                        Toast.makeText(
+                            ctx,
+                            getString(R.string.error_classification, e.message ?: "Unknown"),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
@@ -233,50 +284,67 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         val result = currentResult
         val tempPath = tempImagePath
 
-        if (result == null || tempPath == null) return
+        if (result == null || tempPath == null || isSaved) return
 
-        binding.btnSimpanCatatan.isEnabled = false
+        _binding?.btnSimpanCatatan?.isEnabled = false
+
+        val appContext = requireContext().applicationContext
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Pindahkan file dari cacheDir ke filesDir di latar belakang (IO thread)
                 val permanentPath = withContext(Dispatchers.IO) {
-                    moveToPermanentStorage(File(tempPath))
+                    moveToPermanentStorage(appContext, File(tempPath))
                 }
 
                 if (permanentPath == null) {
                     if (isAdded) {
-                        Toast.makeText(context, "Gagal menyimpan foto secara permanen.", Toast.LENGTH_SHORT).show()
+                        context?.let { ctx ->
+                            Toast.makeText(ctx, "Gagal menyimpan foto secara permanen.", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                    binding.btnSimpanCatatan.isEnabled = true
+                    _binding?.btnSimpanCatatan?.isEnabled = true
                     return@launch
                 }
 
+                isSaved = true
                 permanentImagePath = permanentPath
 
                 val entity = ScanEntity(
                     category = result.category,
-                    confidence = (result.confidence * 100).toDouble(),
+                    confidence = (result.confidence * 100.0),
                     imagePath = permanentPath
                 )
                 repository.insert(entity)
 
-                if (isAdded) {
-                    Toast.makeText(context, getString(R.string.save_success), Toast.LENGTH_SHORT).show()
+                if (!isAdded || _binding == null) return@launch
+
+                context?.let { ctx ->
+                    Toast.makeText(ctx, getString(R.string.save_success), Toast.LENGTH_SHORT).show()
                 }
 
-                // Bersihkan backstack ke DashboardFragment agar navigasi tab bottom bar tidak lockup
-                findNavController().popBackStack(R.id.navigation_dashboard, false)
+                // Bersihkan ResultFragment dari backstack dan pindahkan ke tab "Catatan"
+                try {
+                    val navController = findNavController()
+                    navController.popBackStack(R.id.navigation_result, true)
+                } catch (e: Exception) {
+                    // Abaikan jika sudah di-pop
+                }
 
-                // Pindahkan otomatis ke tab "Catatan"
-                val bottomNav = requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)
+                val bottomNav = activity?.findViewById<BottomNavigationView>(R.id.bottom_navigation)
                 bottomNav?.selectedItemId = R.id.navigation_history
 
             } catch (e: Exception) {
                 if (isAdded) {
-                    Toast.makeText(context, getString(R.string.error_generic, e.message), Toast.LENGTH_LONG).show()
+                    context?.let { ctx ->
+                        Toast.makeText(
+                            ctx,
+                            getString(R.string.error_generic, e.message ?: "Unknown"),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
-                binding.btnSimpanCatatan.isEnabled = true
+                _binding?.btnSimpanCatatan?.isEnabled = true
             }
         }
     }
@@ -285,14 +353,15 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
      * Memindahkan file sementara dari cacheDir ke direktori permanen [filesDir]/scan_images/.
      * Mengembalikan path permanen jika berhasil, null jika gagal.
      */
-    private fun moveToPermanentStorage(tempFile: File): String? {
+    private fun moveToPermanentStorage(appContext: android.content.Context, tempFile: File): String? {
         return try {
-            val scanImagesDir = File(requireContext().filesDir, "scan_images")
+            if (!tempFile.exists()) return null
+            val scanImagesDir = File(appContext.filesDir, "scan_images")
             if (!scanImagesDir.exists()) {
                 scanImagesDir.mkdirs()
             }
             // Ganti awalan TEMP_ dengan IMG_ untuk menandai file sudah permanen
-            val permanentName = tempFile.name.replace("TEMP_", "IMG_")
+            val permanentName = tempFile.name.replaceFirst("TEMP_", "IMG_")
             val permanentFile = File(scanImagesDir, permanentName)
             tempFile.copyTo(permanentFile, overwrite = true)
             tempFile.delete() // Bersihkan file sementara dari cache
@@ -303,21 +372,33 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     }
 
     /**
-     * Menangani tombol Kembali.
-     * Jika mode pindai baru, file sementara di cacheDir dibersihkan
+     * Menangani tombol Kembali (baik tombol UI maupun sistem back).
+     * Jika mode pindai baru dan belum disimpan, file sementara di cacheDir dibersihkan
      * agar tidak menumpuk di penyimpanan perangkat.
      */
     private fun handleBack() {
-        if (!isReadOnly) {
-            // Bersihkan file sementara yang belum disimpan (pengguna membatalkan)
+        cleanupUnsavedTempFile()
+        if (!isAdded) return
+        try {
+            findNavController().navigateUp()
+        } catch (e: Exception) {
+            // Abaikan jika transisi navigasi sedang berlangsung
+        }
+    }
+
+    private fun cleanupUnsavedTempFile() {
+        if (!isReadOnly && !isSaved) {
             tempImagePath?.let { path ->
-                val tempFile = File(path)
-                if (tempFile.exists() && tempFile.name.startsWith("TEMP_")) {
-                    tempFile.delete()
+                try {
+                    val tempFile = File(path)
+                    if (tempFile.exists() && tempFile.name.startsWith("TEMP_")) {
+                        tempFile.delete()
+                    }
+                } catch (e: Exception) {
+                    // Abaikan
                 }
             }
         }
-        findNavController().navigateUp()
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -325,17 +406,22 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Memuat dan menampilkan gambar dengan downsampling cerdas (smart inSampleSize)
-     * untuk mencegah OutOfMemoryError pada kamera beresolusi tinggi.
+     * Memuat dan menampilkan gambar secara asinkron dengan downsampling cerdas (smart inSampleSize)
+     * serta koreksi orientasi EXIF untuk mencegah OutOfMemoryError dan gambar miring.
      */
-    private fun loadImage(file: File) {
-        val bitmap = decodeSampledBitmapFromFile(file, 1024, 1024)
-        if (bitmap != null && _binding != null) {
-            binding.imgCaptured.setImageBitmap(bitmap)
+    private fun loadImageAsync(file: File) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                if (file.exists()) decodeSampledBitmapFromFile(file, 1024, 1024) else null
+            }
+            val currentBinding = _binding
+            if (currentBinding != null && isAdded && bitmap != null) {
+                currentBinding.imgCaptured.setImageBitmap(bitmap)
+            }
         }
     }
 
-    private fun decodeSampledBitmapFromFile(file: File, reqWidth: Int, reqHeight: Int): android.graphics.Bitmap? {
+    private fun decodeSampledBitmapFromFile(file: File, reqWidth: Int, reqHeight: Int): Bitmap? {
         return try {
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
@@ -354,38 +440,82 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
 
             val decodeOptions = BitmapFactory.Options().apply {
                 this.inSampleSize = inSampleSize
-                this.inPreferredConfig = android.graphics.Bitmap.Config.ARGB_8888
+                this.inPreferredConfig = Bitmap.Config.ARGB_8888
             }
-            BitmapFactory.decodeFile(file.absolutePath, decodeOptions)
+            val rawBitmap = BitmapFactory.decodeFile(file.absolutePath, decodeOptions) ?: return null
+            applyExifOrientation(rawBitmap, file.absolutePath)
         } catch (e: OutOfMemoryError) {
             System.gc()
+            null
+        } catch (e: Exception) {
             null
         }
     }
 
+    /**
+     * Membaca metadata EXIF dari file gambar dan memutar Bitmap jika diperlukan
+     * agar foto dari kamera atau galeri tidak tampil miring (rotasi 90/180/270 derajat).
+     */
+    private fun applyExifOrientation(bitmap: Bitmap, imagePath: String): Bitmap {
+        return try {
+            val exif = ExifInterface(imagePath)
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+            val matrix = Matrix()
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.preScale(-1f, 1f)
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.preScale(1f, -1f)
+                else -> return bitmap
+            }
+            val rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            if (rotated != bitmap) {
+                bitmap.recycle()
+            }
+            rotated
+        } catch (e: Exception) {
+            bitmap
+        }
+    }
+
     private fun updateInstructions(category: String) {
+        val currentBinding = _binding ?: return
         when {
             category.contains("ANORGANIK") -> {
-                binding.tvBullet1.text = getString(R.string.anorganik_bullet1)
-                binding.tvBullet2.text = getString(R.string.anorganik_bullet2)
-                binding.tvBullet3.text = getString(R.string.anorganik_bullet3)
+                currentBinding.tvBullet1.text = getString(R.string.anorganik_bullet1)
+                currentBinding.tvBullet2.text = getString(R.string.anorganik_bullet2)
+                currentBinding.tvBullet3.text = getString(R.string.anorganik_bullet3)
             }
             category.contains("ORGANIK") -> {
-                binding.tvBullet1.text = getString(R.string.organik_bullet1)
-                binding.tvBullet2.text = getString(R.string.organik_bullet2)
-                binding.tvBullet3.text = getString(R.string.organik_bullet3)
+                currentBinding.tvBullet1.text = getString(R.string.organik_bullet1)
+                currentBinding.tvBullet2.text = getString(R.string.organik_bullet2)
+                currentBinding.tvBullet3.text = getString(R.string.organik_bullet3)
             }
             else -> {
-                binding.tvBullet1.text = "Foto kurang jelas atau objek tidak dikenali."
-                binding.tvBullet2.text = "Pastikan cahaya cukup dan objek berada di tengah kamera."
-                binding.tvBullet3.text = "Coba pindai ulang dengan sudut pengambilan yang berbeda."
+                currentBinding.tvBullet1.text = "Foto kurang jelas atau objek tidak dikenali."
+                currentBinding.tvBullet2.text = "Pastikan cahaya cukup dan objek berada di tengah kamera."
+                currentBinding.tvBullet3.text = "Coba pindai ulang dengan sudut pengambilan yang berbeda."
             }
         }
     }
 
     override fun onDestroyView() {
+        _binding?.imgInstructionsChevron?.animate()?.cancel()
+        classifier?.close()
         super.onDestroyView()
-        classifier.close()
         _binding = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Jika pengguna meninggalkan ResultFragment melalui tab bawah tanpa menyimpan
+        // (bukan karena rotasi layar), bersihkan file sementara di cacheDir.
+        if (activity?.isChangingConfigurations != true) {
+            cleanupUnsavedTempFile()
+        }
     }
 }

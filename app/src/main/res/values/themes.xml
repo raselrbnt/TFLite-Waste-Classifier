@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Tema Utama Aplikasi -->
-    <style name="Theme.SampahClassifierApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- Tema Utama Aplikasi (Light Mode Eco-Tech) -->
+    <style name="Theme.SampahClassifierApp" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color -->
         <item name="colorPrimary">@color/brand_primary</item>
         <item name="colorPrimaryVariant">@color/brand_primary</item>
